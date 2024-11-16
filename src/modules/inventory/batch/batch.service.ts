@@ -244,12 +244,13 @@ export class BatchService {
       console.log({currentBatchItem})
 
       const newBatch = new this.batchModel({
-        name:currentBatchItem.name,
+        name:currentBatchItem.name + " Added",
         item:currentBatchItem.item,
         supplier:currentBatchItem.supplier,
         cost:currentBatchItem.cost,
         unit:currentBatchItem.unit,
         mfg:currentBatchItem.mfg,
+        type:"Re-Stock",
         exp:currentBatchItem.exp,
         quantity: createTransferDTO.quantity,
         branch: {
@@ -271,7 +272,96 @@ export class BatchService {
       branchItemTo.quantity+= createTransferDTO.quantity;
       branchItemTo.batch.push(newBatch._id as Types.ObjectId);
 
+      await branchItemTo.save();
+      
 
+      
+      const branchItemFrom = await this.branchItemModel.findOne({ branch: createTransferDTO.fromBranchId });
+
+      if (!branchItemFrom) {
+        throw new Error('Branch item not found');
+      }
+    
+      const newQuantity = branchItemFrom.quantity - createTransferDTO.quantity;
+    
+      if (newQuantity <= 0) {
+        await branchItemFrom.deleteOne();
+      } else {
+      console.log({branchItemFrom})
+
+
+      const newBatch = new this.batchModel({
+        name:currentBatchItem.name + " Transfered",
+        item:currentBatchItem.item,
+        supplier:currentBatchItem.supplier,
+        cost:currentBatchItem.cost,
+        unit:currentBatchItem.unit,
+        mfg:currentBatchItem.mfg,
+        exp:currentBatchItem.exp,
+        type:"Transfer",
+        quantity: createTransferDTO.quantity,
+        branch: {
+          quantity: createTransferDTO.quantity, // Ensure quantity is passed as a number
+          branchId: createTransferDTO.toBranch,
+          srp: currentBatchItem.cost, // Set correct price per unit
+          item: currentBatchItem.item,
+        } ,
+      
+      })
+
+       await newBatch.save()
+
+
+        branchItemFrom.quantity= createTransferDTO.quantity;
+         branchItemFrom.batch.push(newBatch._id as Types.ObjectId);
+        await branchItemFrom.save();
+
+
+      
+     
+      }
+   
+      currentBatchItem.quantity -= createTransferDTO.quantity
+     await currentBatchItem.save();
+
+     
+      return newBatch;
+    }
+
+    //if location
+    if(createTransferDTO.toType == "inventory/locations"){
+      const newBatch = new this.batchModel({
+        name:currentBatchItem.name + " Added",
+        item:currentBatchItem.item,
+        supplier:currentBatchItem.supplier,
+        cost:currentBatchItem.cost,
+        unit:currentBatchItem.unit,
+        mfg:currentBatchItem.mfg,
+        type:"Re-Stock",
+        exp:currentBatchItem.exp,
+        quantity: createTransferDTO.quantity,
+        location: {
+          quantity: createTransferDTO.quantity, // Ensure quantity is passed as a number
+          branchId: createTransferDTO.toBranch,
+          srp: currentBatchItem.cost, // Set correct price per unit
+          item: currentBatchItem.item,
+        } ,
+      
+      })
+
+       await newBatch.save()
+
+      //get the brach item
+   
+
+      const branchItemTo = await this.locationItemModel.findOne({branch:createTransferDTO.toBranch});
+      
+      if(!branchItemTo){
+        //const locationItemTo = new this.locationItemModel()
+
+      }
+      branchItemTo.quantity+= createTransferDTO.quantity;
+      branchItemTo.batch.push(newBatch._id as Types.ObjectId);
 
       await branchItemTo.save();
       
@@ -290,16 +380,41 @@ export class BatchService {
       } else {
       console.log({branchItemFrom})
 
+
+      const newBatch = new this.batchModel({
+        name:currentBatchItem.name + " Transfered",
+        item:currentBatchItem.item,
+        supplier:currentBatchItem.supplier,
+        cost:currentBatchItem.cost,
+        unit:currentBatchItem.unit,
+        mfg:currentBatchItem.mfg,
+        exp:currentBatchItem.exp,
+        type:"Transfer",
+        quantity: createTransferDTO.quantity,
+        branch: {
+          quantity: createTransferDTO.quantity, // Ensure quantity is passed as a number
+          branchId: createTransferDTO.toBranch,
+          srp: currentBatchItem.cost, // Set correct price per unit
+          item: currentBatchItem.item,
+        } ,
+      
+      })
+
+       await newBatch.save()
+
+
         branchItemFrom.quantity= createTransferDTO.quantity;
+         branchItemFrom.batch.push(newBatch._id as Types.ObjectId);
         await branchItemFrom.save();
 
-      console.log({branchItemFrom})
+
+      
+     
       }
    
       currentBatchItem.quantity -= createTransferDTO.quantity
      await currentBatchItem.save();
-  
-     console.log(currentBatchItem,newQuantity)
+
      
       return newBatch;
     }

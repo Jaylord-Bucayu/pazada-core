@@ -32,6 +32,10 @@ import { BranchModule } from './modules/branch/branch.module';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { BranchItemsModule } from './modules/inventory/branch-items/branch-items.module';
 import { LocationItemsModule } from './modules/inventory/location-items/location-items.module';
+import { GroupModule } from './modules/inventory/group/group.module';
+import { WarehouseModule } from './modules/warehouse/warehouse.module';
+import { LocationBucketsModule } from './modules/inventory/location-buckets/location-buckets.module';
+import { NfcManagerModule } from './modules/nfc-manager/nfc-manager.module';
 
 
 
@@ -63,6 +67,10 @@ import { LocationItemsModule } from './modules/inventory/location-items/location
     SupplierModule,
     BranchItemsModule,
     LocationItemsModule,
+    GroupModule,
+    WarehouseModule,
+    LocationBucketsModule,
+    NfcManagerModule,
     
   ],
   controllers: [AppController],

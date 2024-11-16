@@ -3,7 +3,7 @@ import { Document, Types } from 'mongoose';
 import { BranchQuantity, BranchQuantitySchema } from './batch-branch.entity';
 import { LocationQuantity, LocationQuantitySchema } from './batch-location.entity';
 
-@Schema({ collection: 'InventoryBatch' })
+@Schema({ collection: 'InventoryBatch',timestamps: true })
 export class Batch extends Document {
   @Prop({ required: true })
   name: string;
@@ -40,6 +40,9 @@ export class Batch extends Document {
 
   @Prop([{ type: LocationQuantitySchema, default:[]  }])
   location: LocationQuantity[] = [];
+
+  @Prop({required:true,default:"Re-Stock"})
+  type:string;
 
 }
 

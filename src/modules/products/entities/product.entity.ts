@@ -11,20 +11,45 @@ export class Product extends Document {
     @Prop({ default: 0.00 })
     price: number;
 
+    @Prop({ default: 0.00 })
+    cost: number;
+
+    @Prop({ default: 0 })
+    reOrderPoint: number;
+
+    @Prop({ default: 0 })
+    creditPrice: number;
+
     @Prop({ default: true })
     isActive: boolean;
 
-    @Prop({ required: true })
+    @Prop({ required: false,default:"" })
     description: string;
 
     @Prop({ default: [] })
     images: string[];
 
-    @Prop({ default: 0 })
-    creditPrice: number;
+    @Prop({ type: Types.ObjectId, ref: 'Location', required: false })
+    inventoryLocation: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
     category: Types.ObjectId;
+
+    @Prop({ required:false,default:"" })
+    sku: string;
+
+    @Prop({ required: false,default:"" })
+    receiptAlias: string;
+
+    @Prop({ required: false,default:"" })
+    barcode: string;
+
+    @Prop({ required: false,default:"" })
+    unit: string;
+
+    @Prop({ required: false,default:0 })
+    stock: string;
 }
+
 
 export const ProductSchema = SchemaFactory.createForClass(Product).add(AbstractSchema);
