@@ -12,7 +12,6 @@ import {
 } from '../categories/entities/category.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
-import { Department, DepartmentSchema } from '../departments/entities/department.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
@@ -20,8 +19,7 @@ import { JwtService } from '@nestjs/jwt';
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
       { name: Category.name, schema: CategorySchema },
-      { name: User.name, schema: User },
-      { name: Department.name, schema: DepartmentSchema },
+      { name: User.name, schema: User }
     ]),
   ],
   controllers: [ProductsController],

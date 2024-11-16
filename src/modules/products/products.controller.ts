@@ -5,7 +5,6 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { JwtGuard } from 'src/common/guards/jwt.guard';
 import { Actions } from '../../common/decorators/actions.decorator';
-import { DepartmentGuard } from 'src/common/guards/department.guard';
 
 @Controller('products')
 // @UseGuards(JwtGuard, DepartmentGuard)

@@ -4,13 +4,11 @@ import { Model } from 'mongoose';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Department } from '../departments/entities/department.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-    @InjectModel(Department.name) private readonly departmentModel: Model<Department>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -47,7 +45,5 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
-  async findDepartmentById(departmentId: string): Promise<Department> {
-    return this.departmentModel.findById(departmentId).exec();
-  }
+
 }
