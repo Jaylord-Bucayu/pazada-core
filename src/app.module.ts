@@ -25,6 +25,8 @@ import { BusinessModule } from './modules/settings/business/business.module';
 import { BranchModule } from './modules/branch/branch.module';
 
 import { NfcManagerModule } from './modules/nfc-manager/nfc-manager.module';
+import { CardAccountModule } from './modules/card-account/card-account.module';
+import { TransactionHistoryModule } from './modules/transaction-history/transaction-history.module';
 
 
 
@@ -46,6 +48,8 @@ import { NfcManagerModule } from './modules/nfc-manager/nfc-manager.module';
     BusinessModule,
     BranchModule,
     NfcManagerModule,
+    CardAccountModule,
+    TransactionHistoryModule,
     
   ],
   controllers: [AppController],

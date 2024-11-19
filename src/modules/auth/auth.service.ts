@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ValidateteUserDto } from '../users/dto/validate-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,17 +41,55 @@ export class AuthService {
     // instead of the user object
   }
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+ // Login method with validation
+ async login(loginDto: LoginDto) {
+  const { email, password } = loginDto;
+
+  // Find user by email
+  const user = await this.usersService.findOneEmail(email);
+  if (!user) {
+    throw new UnauthorizedException('Invalid email or password');
   }
 
+  // Check if the provided password matches the hashed password in the database
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new UnauthorizedException('Invalid email or password');
+  }
+
+  // Prepare the JWT payload
+  const payload = { email: user.email, sub: user._id, role: user.role };
+
+  // Generate access token
+  const accessToken = this.jwtService.sign(payload);
+
+  // Remove the password from the response for security
+  const { password: _, ...userWithoutPassword } = user.toObject();
+
+  // Return the token and user information
+  return {
+      user: userWithoutPassword,
+      access_token: accessToken,
+  };
+}
+
   async register(user: RegisterDto) {
+    // Check if the email already exists
     await this.usersService.findOneEmail(user.email);
 
-    const newUser = await this.userModel.create(user);
-    return { data: newUser };
+    // Hash the user's password
+    const saltRounds = 10; // The salt rounds for bcrypt
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+
+    // Create a new user with the hashed password
+    const newUser = await this.userModel.create({
+      ...user,
+      password: hashedPassword,
+    });
+
+    // Remove the password from the response for security
+    const { password, ...userWithoutPassword } = newUser.toObject();
+
+    return { data: userWithoutPassword };
   }
 }

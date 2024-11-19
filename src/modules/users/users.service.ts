@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './entities/user.entity';
@@ -45,5 +45,31 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
+
+    // Method to complete user profile using email
+  async completeProfileByEmail(email: string, updateProfileDto: UpdateUserDto): Promise<User> {
+    const user = await this.userModel.findOne({ email }).exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.staged !== 0) {
+      throw new BadRequestException('User profile is already completed');
+    }
+
+    // Set role to 'merchant' if not provided
+    if (!updateProfileDto.role) {
+      updateProfileDto.role = 'merchant';
+    }
+
+    // Update user profile details and set staged to 1
+    Object.assign(user, updateProfileDto);
+    user.staged = 1;
+
+    await user.save();
+
+    return user;
+  }
 
 }

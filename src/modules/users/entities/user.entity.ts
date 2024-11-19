@@ -6,7 +6,8 @@ import { Document, Types } from 'mongoose';
 export class User extends Document {
   
   @Exclude()
-  password?: string;
+  @Prop({ type: String,required:true })
+  password: string;
 
   @Prop({ type: String })
   customer_code: string;
@@ -32,7 +33,7 @@ export class User extends Document {
   @Prop({ type: String })
   lastname: string;
 
-  @Prop({ type: String, unique: true })
+  @Prop({ type: String, unique: true ,required:true})
   email: string;
 
   @Prop({ type: Number, unique: true })
@@ -56,6 +57,9 @@ export class User extends Document {
 
   @Prop({ default:true })
   isActive: boolean;
+
+  @Prop({ default:0 })
+  staged: number;
 
 
   @Expose()

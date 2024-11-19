@@ -46,4 +46,14 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+
+  @Patch('complete-profile/:email')
+  async completeProfileByEmail(
+    @Param('email') email: string,
+    @Body() updateProfileDto: UpdateUserDto,
+  ) {
+    const updatedUser = await this.usersService.completeProfileByEmail(email, updateProfileDto);
+    return { data: updatedUser, message: 'Profile updated successfully' };
+  }
+
 }

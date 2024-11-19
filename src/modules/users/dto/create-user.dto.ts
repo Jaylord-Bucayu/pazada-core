@@ -14,7 +14,7 @@ export class CreateUserDto {
     postal_code: number;
     region: string;
     provider: string;
-    password?: string;
+    password: string;
     role?: string;
   }
   
