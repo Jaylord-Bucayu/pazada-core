@@ -16,10 +16,16 @@ export class UsersService {
     return newUser.save();
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAll(role?: string): Promise<User[]> {
+    if (role) {
+      // If a role is provided, filter by role
+      return this.userModel.find({ role }).exec();
+    } else {
+      // Otherwise, return all users
+      return this.userModel.find().exec();
+    }
   }
-
+  
   async findOne(id: string): Promise<User> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {

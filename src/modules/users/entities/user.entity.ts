@@ -73,7 +73,7 @@ export class User extends Document {
   @Prop({ type: String }) // Role within the department
   departmentRole: string;
 
-  @Prop({ type: String }) // Role within the company (if needed)
+  @Prop({ type: String,default:"merchant" }) // Role within the company (if needed)
   role: string;
 }
 
