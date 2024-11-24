@@ -47,4 +47,35 @@ export class NfcManagerController {
     return await this.nfcManagerService.addBalance(customerId, amount);
   }
 
+
+
+  @Post('encryptData')
+  encryptData(@Body() data: any) {
+    if (!data || Object.keys(data).length === 0) {
+      throw new BadRequestException('Data to encrypt is required');
+    }
+
+    const encryptedData = this.nfcManagerService.encryptData(data);
+    return { encryptedData };
+  }
+
+  @Post('decryptData')
+  decryptData(@Body('encryptedData') encryptedData: string) {
+    if (!encryptedData) {
+      throw new BadRequestException('Encrypted data is required');
+    }
+    console.log(encryptedData)
+    const decryptedData = this.nfcManagerService.decryptData(encryptedData);
+    return { decryptedData };
+  }
 }
+/* const data = {
+      C: 123,
+      I: 500,
+      B: 1500,
+      S: 543,
+      P: 0,
+      T: 1731583838,
+      A: 1,
+      H: "08b5d41b0a01ec8fe5dc03b61ed438ee"
+    }; */
