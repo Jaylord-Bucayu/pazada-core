@@ -1,27 +1,39 @@
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
 export class CreateTransactionHistoryDto {
-  @IsString()
-  @IsNotEmpty()
-  customer_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  transaction_type: string;
 
   @IsNumber()
   @IsNotEmpty()
-  amount: number;
+  C: number;  // 'C' field for some value
 
-//   @IsNumber()
-//   @IsNotEmpty()
-//   previous_balance: number;
+  @IsNumber()
+  @IsNotEmpty()
+  I: number;  // 'I' field (widget amount converted to integer)
 
-//   @IsNumber()
-//   @IsNotEmpty()
-//   new_balance: number;
+  @IsNumber()
+  @IsNotEmpty()
+  B: number;  // 'S' field
+
+
+  @IsNumber()
+  @IsNotEmpty()
+  S: number;  // 'S' field
+
+  @IsNumber()
+  @IsNotEmpty()
+  P: number;  // 'P' field
+
+  @IsNumber()
+  @IsNotEmpty()
+  T: number;  // 'T' field (timestamp)
+
+  @IsNumber()
+  @IsNotEmpty()
+  A: number;  // 'A' field (status or other related field)
 
   @IsString()
   @IsNotEmpty()
-  status: string;
+  H: string;  // 'H' field (hash or related field)
+
+
 }

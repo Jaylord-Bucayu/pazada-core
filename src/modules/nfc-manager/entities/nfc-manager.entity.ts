@@ -1,1 +1,4 @@
-export class NfcManager {}
+export class NfcManager {
+
+    
+}

@@ -50,12 +50,13 @@ export class NfcManagerController {
 
 
   @Post('encryptData')
-  encryptData(@Body() data: any) {
+ async encryptData(@Body() data: any) {
     if (!data || Object.keys(data).length === 0) {
       throw new BadRequestException('Data to encrypt is required');
     }
 
-    const encryptedData = this.nfcManagerService.encryptData(data);
+    const encryptedData = await this.nfcManagerService.encryptData(data);
+    console.log({encryptedData})
     return { encryptedData };
   }
 

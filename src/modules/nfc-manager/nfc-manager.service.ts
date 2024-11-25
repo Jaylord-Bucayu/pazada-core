@@ -5,16 +5,21 @@ import { CardAccount } from '../card-account/entities/card-account.entity';
 import { TransferBalanceDto } from './dto/transfer-balance.dto';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service'; // Import the TransactionHistoryService
 import * as crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class NfcManagerService {
+  private readonly secretKey: string;
+  
   constructor(
+    private readonly configService: ConfigService,
     @InjectModel(CardAccount.name) private cardAccountModel: Model<CardAccount>,
     private transactionHistoryService: TransactionHistoryService, // Inject the TransactionHistoryService
-  ) {}
+  ) {
+    this.secretKey = this.configService.get<string>('AES_SECRET');
+  }
 
 
-  private readonly secretKey = 'your-128-bit-key'; // 128-bit key (16 characters)
 
   // Check the balance of a customer (card account)
   async checkBalance(customerId: string): Promise<number | null> {
@@ -51,19 +56,19 @@ export class NfcManagerService {
     await toCardAccount.save();
 
     // Log transaction
-    await this.transactionHistoryService.create({
-      customer_id: fromCustomerId,
-      transaction_type: 'transfer',
-      amount,
-      status: 'success',
-    });
+    // await this.transactionHistoryService.create({
+    //   customer_id: fromCustomerId,
+    //   transaction_type: 'transfer',
+    //   amount,
+    //   status: 'success',
+    // });
 
-    await this.transactionHistoryService.create({
-      customer_id: toCustomerId,
-      transaction_type: 'receive',
-      amount,
-      status: 'success',
-    });
+    // await this.transactionHistoryService.create({
+    //   customer_id: toCustomerId,
+    //   transaction_type: 'receive',
+    //   amount,
+    //   status: 'success',
+    // });
 
     return {
       fromBalance: fromCardAccount.balance,
@@ -94,14 +99,14 @@ export class NfcManagerService {
     await fromCardAccount.save();
 
     // Log transaction
-    await this.transactionHistoryService.create({
-      customer_id,
-      transaction_type: 'payment',
-      amount,
-      // previous_balance: previousBalanceFrom,
-      // new_balance: fromCardAccount.balance,
-      status: 'success',
-    });
+    // await this.transactionHistoryService.create({
+    //   customer_id,
+    //   transaction_type: 'payment',
+    //   amount,
+    //   // previous_balance: previousBalanceFrom,
+    //   // new_balance: fromCardAccount.balance,
+    //   status: 'success',
+    // });
 
     return {
       fromBalance: fromCardAccount.balance,
@@ -133,12 +138,12 @@ export class NfcManagerService {
     await cardAccount.save();
 
     // Log transaction
-    await this.transactionHistoryService.create({
-      customer_id: customerId,
-      transaction_type: 'add',
-      amount,
-      status: 'success',
-    });
+    // await this.transactionHistoryService.create({
+    //   customer_id: customerId,
+    //   transaction_type: 'add',
+    //   amount,
+    //   status: 'success',
+    // });
 
     return {
       newBalance: cardAccount.balance,
@@ -157,35 +162,49 @@ export class NfcManagerService {
   //   return iv.toString('hex') + encrypted;
   // }
 
-  encryptData(data: any): string {
+  async encryptData(data: any): Promise<any> {
     // Ensure the data is an object (in case a JSON string is provided)
     if (typeof data === 'string') {
-      data = JSON.parse(data);
+        data = JSON.parse(data);
     }
-    
-    const value = JSON.parse(data["encryptedData"]);;
-    
-    // Extract and add "I" to "B"
-    if (value.hasOwnProperty('I') && value.hasOwnProperty('B')) {
-      const iValue = parseFloat(value['I']);
-      const bValue = parseFloat(value['B']);
-      value['B'] = bValue + iValue;
-     
-    }
-    
-    console.log(value)
+
+    // Parse the encryptedData from the input object
+    const value = JSON.parse(data["encryptedData"]);
+
+
+    // Hash the value before encryption using MD5
+    const hash = crypto.createHash('md5');
+    hash.update(JSON.stringify(value));  // Hash the data (you can choose to hash the specific parts of the data you need)
+    const hashedData = hash.digest('hex');  // Get the hex representation of the hashed data
+  
+    // Add the MD5 hash as part of the object (you can store it or manipulate as needed)
+    value['H'] = hashedData;
+
+    // Now, proceed with encryption of the data (excluding the hash part)
     const iv = crypto.randomBytes(16); // Initialization vector
     const cipher = crypto.createCipheriv('aes-128-cbc', Buffer.from(this.secretKey), iv);
-    
+
+    console.log(iv);
+    // Encrypt the data (use the object with the hash included)
     let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
-    // Returning iv (for decryption) + encrypted data (hexadecimal string)
-    return iv.toString('hex') + encrypted;
-  }
+
+
+    // Return the iv (for decryption) + encrypted data (in hexadecimal string form)
+    const encryptedData = iv.toString('hex') + encrypted;
+
+
+    // Save the encrypted data into the database or use as needed
+    await this.transactionHistoryService.create(value);
+
+    // Log the hashed data (optional, for debugging)
+    console.log(value['H']);
+
+    return encryptedData;  // Returning the final encrypted data
+}
   
 
-  decryptData(encryptedData: string): object {
+  decryptData(encryptedData: string): string {
     const iv = Buffer.from(encryptedData.slice(0, 32), 'hex'); // Extract the IV
     const encryptedText = encryptedData.slice(32);
 
@@ -193,6 +212,6 @@ export class NfcManagerService {
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
-    return JSON.parse(decrypted);
+    return decrypted;
   }
 }
