@@ -6,6 +6,8 @@ import { TransferBalanceDto } from './dto/transfer-balance.dto';
 import { TransactionHistoryService } from '../transaction-history/transaction-history.service'; // Import the TransactionHistoryService
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
+import CryptoJS from 'crypto-js';
+
 
 @Injectable()
 export class NfcManagerService {
@@ -168,23 +170,23 @@ export class NfcManagerService {
       if (typeof data === 'string') {
         data = JSON.parse(data);
       }
-
+  
       // Parse the encryptedData from the input object
       const value = JSON.parse(data['encryptedData']);
-
+  
       // Hash the value before encryption using MD5
       const hash = crypto.createHash('md5');
       hash.update(JSON.stringify(value));  // Hash the data
       const hashedData = hash.digest('hex');  // Get the hex representation of the hashed data
-
+  
       // Add the MD5 hash as part of the object
       value['H'] = hashedData;
-
+  
       // Check if 'B' property exists, if not, initialize it to 0
       if (!Object.prototype.hasOwnProperty.call(value, 'B')) {
         value['B'] = 0;
       }
-
+  
       // Adjust the balance based on the action type
       if (value['A'] === 1) {
         // Action A=1 means add the issuance amount to the balance
@@ -193,32 +195,26 @@ export class NfcManagerService {
         // Action A=2 means subtract the issuance amount from the balance
         value['B'] -= value['I'];
       }
-
-      console.log(value['B'])
-      // Now, proceed with encryption of the data (excluding the hash part)
-      const iv = crypto.randomBytes(16); // Initialization vector
-      const cipher = crypto.createCipheriv('aes-128-cbc', this.secretKey, iv);
-
+  
+      console.log(value['B']); // For debugging, log the balance
+  
+      // Ensure the secret key is 16 bytes (AES-128 requires 16-byte keys)
+      const secretKey = Buffer.from(this.secretKey.padEnd(16, '0')); // Pad or trim to 16 bytes
+  
+      // Create the cipher object with AES-128-ECB (no IV needed for ECB mode)
+      const cipher = crypto.createCipheriv('aes-128-ecb', secretKey, null);
+  
       // Encrypt the data (use the object with the hash included)
-      let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'hex');
-      encrypted += cipher.final('hex');
-
-      // Return the iv (for decryption) + encrypted data (in hexadecimal string form)
-      const encryptedData = iv.toString('hex') + encrypted;
-
-      // Save the encrypted data into the database
-      await this.transactionHistoryService.create(value);
-
-      // Log the hashed data (optional, for debugging)
-      console.log('Hashed Data:', value['H']);
-
-      return encryptedData;  // Returning the final encrypted data
+      let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'base64');
+      encrypted += cipher.final('base64');
+  
+      // Return only the encrypted data in Base64 format
+      return encrypted;
     } catch (error) {
       console.error('Encryption failed:', error.message);
       throw new Error('Encryption error: Unable to encrypt data');
     }
   }
-
   decryptData(encryptedData: string): string {
     const iv = Buffer.from(encryptedData.slice(0, 32), 'hex'); // Extract the IV
     const encryptedText = encryptedData.slice(32);
