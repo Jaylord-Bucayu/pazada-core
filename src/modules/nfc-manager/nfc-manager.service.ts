@@ -188,6 +188,11 @@ export class NfcManagerService {
       }
   
       // Adjust the balance based on the action type
+      if (value['I'] > value['B']) {
+        throw new Error('Issuance amount cannot be greater than the balance');
+      }
+      
+      // Adjust the balance based on the action type
       if (value['A'] === 1) {
         // Action A=1 means add the issuance amount to the balance
         value['B'] += value['I'];
@@ -195,6 +200,10 @@ export class NfcManagerService {
         // Action A=2 means subtract the issuance amount from the balance
         value['B'] -= value['I'];
       }
+      
+      // Ensure the balance is always positive
+      value['B'] = Math.abs(value['B']);
+      
   
       console.log(value['B']); // For debugging, log the balance
   
