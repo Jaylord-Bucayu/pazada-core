@@ -16,9 +16,13 @@ export class TransactionHistoryController {
 
   // Retrieve all TransactionHistory entries
   @Get()
-  findAll(@Query('transaction_type') type?: string): Promise<TransactionHistory[]> {
-    return this.transactionHistoryService.findAll(type);
+  findAll(
+    @Query('transaction_type') type?: string,
+    @Query('limit') limit?: number,
+  ): Promise<TransactionHistory[]> {
+    return this.transactionHistoryService.findAll(type, limit);
   }
+  
   // Retrieve a single TransactionHistory entry by ID
   @Get(':id')
   findOne(@Param('id') id: string) {

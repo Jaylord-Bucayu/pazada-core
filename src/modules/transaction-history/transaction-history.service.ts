@@ -18,13 +18,13 @@ export class TransactionHistoryService {
   }
 
   // Get all transactions
-  async findAll(transaction_type?: string): Promise<TransactionHistory[]> {
+  async findAll(transaction_type?: string, limit?: number): Promise<TransactionHistory[]> {
     if (transaction_type) {
       // Filter by type if provided
-      return this.transactionHistoryModel.find({ transaction_type }).exec();
+      return this.transactionHistoryModel.find({ transaction_type }).limit(limit || 0) // If limit is not provided, default to no limitexec();
     } else {
       // Otherwise, return all records
-      return this.transactionHistoryModel.find().exec();
+      return this.transactionHistoryModel.find().limit(limit || 0) // If limit is not provided, default to no limitexec();
     }
   }
 

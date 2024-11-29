@@ -217,6 +217,10 @@ export class NfcManagerService {
       let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'base64');
       encrypted += cipher.final('base64');
   
+
+        // Log transaction
+       await this.transactionHistoryService.create(value);
+
       // Return only the encrypted data in Base64 format
       return encrypted;
     } catch (error) {
